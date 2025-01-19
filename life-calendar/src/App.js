@@ -10,6 +10,8 @@ import {
   VStack,
   HStack,
   Container,
+  Grid,
+  GridItem,
 } from "@chakra-ui/react"; // Chakra UI 컴포넌트 불러오기
 import {
   Chart as ChartJS, // Chart.js의 필수 모듈 등록
@@ -38,7 +40,7 @@ function App() {
 
   // 주 단위 계산 함수
   const calculateWeeks = () => {
-    if (!birthDate) return { livedWeeks: 0, remainingWeeks: 0 }; // 생년월일이 없으면 초기값 반환
+    if (!birthDate) return { livedWeeks: 0, totalWeeks: 0 }; // 생년월일이 없으면 초기값 반환
 
     const now = new Date(); // 현재 날짜
     const birth = new Date(birthDate); // 입력된 생년월일
@@ -47,11 +49,11 @@ function App() {
     const livedWeeks = Math.floor((now - birth) / (1000 * 60 * 60 * 24 * 7)); // 현재까지 살아온 주 수 계산
     const remainingWeeks = Math.max(totalWeeks - livedWeeks, 0); // 남은 주 수 계산 (0 이하 방지)
 
-    return { livedWeeks, remainingWeeks }; // 계산된 주 수 반환
+    return { livedWeeks, remainingWeeks, totalWeeks }; // 계산된 주 수 반환
   };
 
   // 계산된 주 수
-  const { livedWeeks, remainingWeeks } = calculateWeeks();
+  const { livedWeeks, remainingWeeks, totalWeeks } = calculateWeeks();
 
   // 차트 데이터 정의
   const chartData = {
@@ -141,6 +143,28 @@ function App() {
           <Box maxW="600px" mx="auto">
             <Bar data={chartData} options={chartOptions} />
           </Box>
+        </Box>
+
+        {/* 캘린더 섹션 */}
+        <Box p="4" borderWidth="1px" borderRadius="lg" shadow="sm">
+          <Heading size="md" mb="4">
+            캘린더
+          </Heading>
+          {/* 주 단위 캘린더 */}
+          <Grid templateColumns="repeat(52, 1fr)" gap="1">
+            {Array.from({ length: totalWeeks }).map((_, index) => (
+              <GridItem
+                key={index}
+                w="5px"
+                h="5px"
+                bg={index < livedWeeks ? "blue.400" : "gray.300"}
+                borderRadius="sm"
+              />
+            ))}
+          </Grid>
+          <Text mt="4" fontSize="sm">
+            총 {totalWeeks}주 중 {livedWeeks}주를 살았습니다.
+          </Text>
         </Box>
       </VStack>
     </Container>
