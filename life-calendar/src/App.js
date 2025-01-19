@@ -1,8 +1,18 @@
-import React, {useState} from "react";
-import { Bar } from "react-chartjs-2"
-// Chart.js 필수 구성 요소 불러오기
+import React, { useState } from "react";
+import { Bar } from "react-chartjs-2"; // Chart.js의 Bar 차트를 사용
 import {
-  Chart as ChartJS,
+  Box,
+  Input,
+  FormControl,
+  FormLabel,
+  Heading,
+  Text,
+  VStack,
+  HStack,
+  Container,
+} from "@chakra-ui/react"; // Chakra UI 컴포넌트 불러오기
+import {
+  Chart as ChartJS, // Chart.js의 필수 모듈 등록
   CategoryScale,
   LinearScale,
   BarElement,
@@ -11,119 +21,129 @@ import {
   Legend,
 } from "chart.js";
 
-// Chart.js 구성 요소 등록
+// Chart.js의 필수 구성 요소 등록
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function App() {
+  // 생년월일 상태
   const [birthDate, setBirthDate] = useState("");
+  // 기준 연수 상태
   const [lifeSpan, setLifeSpan] = useState(80);
 
-  // 생년월일 변경 핸들러
-  const handleBirthDateChange = (e) => {
-    const value = e.target.value;
-    console.log("입력된 생년월일:", value);
-    setBirthDate(value);
-  };
+  // 생년월일 입력 핸들러
+  const handleBirthDateChange = (e) => setBirthDate(e.target.value);
 
-  // 기준 연수 변경 핸들러
-  const handleLifeSpanChange = (e) => {
-    const value = e.target.value;
-    console.log("입력된 기준 연수:", value);
-    setLifeSpan(value);
-  };
+  // 기준 연수 입력 핸들러
+  const handleLifeSpanChange = (e) => setLifeSpan(Number(e.target.value));
 
-  // 주 계산 함수
+  // 주 단위 계산 함수
   const calculateWeeks = () => {
-    if (!birthDate) return { livedWeeks: 0, remainingWeeks: 0 };
+    if (!birthDate) return { livedWeeks: 0, remainingWeeks: 0 }; // 생년월일이 없으면 초기값 반환
 
-    const now = new Date();
-    const birth = new Date(birthDate);
+    const now = new Date(); // 현재 날짜
+    const birth = new Date(birthDate); // 입력된 생년월일
 
-    // 전체 수명 주 계산
-    const totalWeeks = lifeSpan * 52;
+    const totalWeeks = lifeSpan * 52; // 기준 연수에 따른 총 주 수
+    const livedWeeks = Math.floor((now - birth) / (1000 * 60 * 60 * 24 * 7)); // 현재까지 살아온 주 수 계산
+    const remainingWeeks = Math.max(totalWeeks - livedWeeks, 0); // 남은 주 수 계산 (0 이하 방지)
 
-    // 살아온 주 계산
-    const livedWeeks = Math.floor((now - birth) / (1000 * 60 * 60 * 24 * 7));
-
-    // 남은 주 계산
-    const remainingWeeks = totalWeeks - livedWeeks;
-
-    console.log("전체 주:", totalWeeks);
-    console.log("살아온 주:", livedWeeks);
-    console.log("남은 주:", remainingWeeks);
-
-    return { livedWeeks, remainingWeeks };
+    return { livedWeeks, remainingWeeks }; // 계산된 주 수 반환
   };
 
-  // 계산된 결과
+  // 계산된 주 수
   const { livedWeeks, remainingWeeks } = calculateWeeks();
 
-  // 차트 데이터
+  // 차트 데이터 정의
   const chartData = {
-    labels: ["살아온 주", "남은 주"],
+    labels: ["살아온 주", "남은 주"], // 차트의 라벨
     datasets: [
       {
-        label: "주 수",
-        data: [livedWeeks, remainingWeeks > 0 ? remainingWeeks : 0],
-        backgroundColor: ["rgba(75, 192, 192, 0.6)", "rgba(255, 99, 132, 0.6)"],
-        borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 99, 132, 1)"],
-        borderWidth: 1,
+        label: "주 수", // 데이터셋 이름
+        data: [livedWeeks, remainingWeeks], // 살아온 주와 남은 주 데이터
+        backgroundColor: [
+          "rgba(75, 192, 192, 0.6)", // 살아온 주 색상
+          "rgba(255, 99, 132, 0.6)", // 남은 주 색상
+        ],
+        borderColor: [
+          "rgba(75, 192, 192, 1)", // 살아온 주 테두리 색상
+          "rgba(255, 99, 132, 1)", // 남은 주 테두리 색상
+        ],
+        borderWidth: 1, // 테두리 두께
       },
     ],
   };
 
+  // 차트 옵션 정의
   const chartOptions = {
-    responsive: true,
+    responsive: true, // 반응형 활성화
     plugins: {
-      legend: { display: false },
+      legend: { display: false }, // 범례 비활성화
     },
     scales: {
-      y: {
-        beginAtZero: true,
-      },
+      y: { beginAtZero: true }, // Y축이 0부터 시작
     },
   };
 
-
   return (
-    <div>
-      <h1>인생달력</h1>
-      {/* 생년월일 입력 */}
-      <div>
-        <label htmlFor="birthDate">생년월일: </label>
-        <input
-          type="date"
-          id="birthDate"
-          value={birthDate}
-          onChange={handleBirthDateChange}
-        />
-      </div>
+    <Container maxW="container.md" py="8">
+      {/* 제목 */}
+      <Heading mb="6" textAlign="center">
+        인생달력
+      </Heading>
 
-      {/* 기준 연수 입력 */}
-      <div>
-        <label htmlFor="lifeSpan">기준 연수: </label>
-        <input
-          type="number"
-          id="lifeSpan"
-          value={lifeSpan}
-          onChange={handleLifeSpanChange}
-        />
-      </div>
+      <VStack spacing="6" align="stretch">
+        {/* 입력 섹션 */}
+        <Box p="4" borderWidth="1px" borderRadius="lg" shadow="sm">
+          {/* 생년월일 입력 */}
+          <FormControl mb="4">
+            <FormLabel>생년월일</FormLabel>
+            <Input
+              type="date"
+              value={birthDate}
+              onChange={handleBirthDateChange}
+            />
+          </FormControl>
 
-      {/* 계산 결과 출력 */}
-      <div>
-        <h2>결과</h2>
-        <p>살아온 주: {livedWeeks}주</p>
-        <p>남은 주: {remainingWeeks > 0 ? remainingWeeks : 0}주</p>
-      </div>
+          {/* 기준 연수 입력 */}
+          <FormControl>
+            <FormLabel>기준 연수</FormLabel>
+            <Input
+              type="number"
+              value={lifeSpan}
+              onChange={handleLifeSpanChange}
+            />
+          </FormControl>
+        </Box>
 
-      {/* 차트 추가 */}
-      <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-        <h2>시각화</h2>
-        <Bar data={chartData} options={chartOptions} />
-      </div>
+        {/* 결과 섹션 */}
+        <Box p="4" borderWidth="1px" borderRadius="lg" shadow="sm">
+          <Heading size="md" mb="4">
+            결과
+          </Heading>
+          {/* 살아온 주 표시 */}
+          <HStack justifyContent="space-between">
+            <Text>살아온 주:</Text>
+            <Text fontWeight="bold">{livedWeeks}주</Text>
+          </HStack>
+          {/* 남은 주 표시 */}
+          <HStack justifyContent="space-between">
+            <Text>남은 주:</Text>
+            <Text fontWeight="bold">{remainingWeeks}주</Text>
+          </HStack>
+        </Box>
 
-    </div>
+        {/* 차트 섹션 */}
+        <Box p="4" borderWidth="1px" borderRadius="lg" shadow="sm">
+          <Heading size="md" mb="4">
+            시각화
+          </Heading>
+          {/* 막대 차트 */}
+          <Box maxW="600px" mx="auto">
+            <Bar data={chartData} options={chartOptions} />
+          </Box>
+        </Box>
+      </VStack>
+    </Container>
   );
 }
 
