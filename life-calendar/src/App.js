@@ -1,4 +1,18 @@
 import React, {useState} from "react";
+import { Bar } from "react-chartjs-2"
+// Chart.js 필수 구성 요소 불러오기
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+// Chart.js 구성 요소 등록
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function App() {
   const [birthDate, setBirthDate] = useState("");
@@ -44,6 +58,33 @@ function App() {
   // 계산된 결과
   const { livedWeeks, remainingWeeks } = calculateWeeks();
 
+  // 차트 데이터
+  const chartData = {
+    labels: ["살아온 주", "남은 주"],
+    datasets: [
+      {
+        label: "주 수",
+        data: [livedWeeks, remainingWeeks > 0 ? remainingWeeks : 0],
+        backgroundColor: ["rgba(75, 192, 192, 0.6)", "rgba(255, 99, 132, 0.6)"],
+        borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 99, 132, 1)"],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  };
+
+
   return (
     <div>
       <h1>인생달력</h1>
@@ -75,6 +116,13 @@ function App() {
         <p>살아온 주: {livedWeeks}주</p>
         <p>남은 주: {remainingWeeks > 0 ? remainingWeeks : 0}주</p>
       </div>
+
+      {/* 차트 추가 */}
+      <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+        <h2>시각화</h2>
+        <Bar data={chartData} options={chartOptions} />
+      </div>
+
     </div>
   );
 }
